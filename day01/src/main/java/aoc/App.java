@@ -18,68 +18,53 @@ public class App {
 
     public Integer getSolutionPart1() {
         int sum = 0;
-        int elf = 0;
         int total = 0;
-        int i = 1;
         for(String n : input) {
             if(!n.isEmpty()) {
                 int in=Integer.parseInt(n);
                 total = in + total;
             } else {
                 if(total > sum) {
-                    elf = i;
                     sum = total;
                 }
-                i++;
                 total = 0;
             }
-        };
+        }
         return sum;
     }
 
     public Integer getSolutionPart2() {
-        int sum1 = 0;
-        int sum2 = 0;
-        int sum3 = 0;
-
+        int[] high = {0,0,0};
         int total = 0;
-
         for(String n : input) {
             if(!n.isEmpty()) {
                 int in=Integer.parseInt(n);
                 total = in + total;
             } else {
 
-                if(total > sum1) {
-                    sum3 = sum2;
-                    sum2 = sum1;
-                    sum1 = total;
-                }
-                else if(total > sum2) {
-                    sum3 = sum2;
-                    sum2 = total;
-                }
-                else if(total > sum3) {
-                    sum3 = total;
-                }
+                readHighscore(total, high);
                 total = 0;
             }
-        };
-
-        if(total > sum1) {
-            sum3 = sum2;
-            sum2 = sum1;
-            sum1 = total;
-        }
-        else if(total > sum2) {
-            sum3 = sum2;
-            sum2 = total;
-        }
-        else if(total > sum3) {
-            sum3 = total;
         }
 
-        return sum1+sum2+sum3;
+        readHighscore(total, high);
+
+        return high[0]+high[1]+high[2];
+    }
+
+    private static void readHighscore(Integer curr, int[] high) {
+        if(curr > high[0]) {
+            high[2] = high[1];
+            high[1] = high[0];
+            high[0] = curr;
+        }
+        else if(curr > high[1]) {
+            high[2] = high[1];
+            high[1] = curr;
+        }else if(curr > high[2]) {
+            high[2] = curr;
+        }
+
     }
 
     public static void main(String[] args) throws IOException {
