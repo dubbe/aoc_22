@@ -14,20 +14,20 @@ import java.util.stream.Collectors;
 
 public class App {
     private final List<String> input;
-    private Map<String, Integer> pointsTable;
+    private Map<String, Integer> pointsTable = new HashMap<String, Integer>() {
+        {
+            put("X", 0);
+            put("Y", 1);
+            put("Z", 2);
+            put("A", 0);
+            put("B", 1);
+            put("C", 2);
+        }
+    };
     private Map<String, Integer> opponentMove;
 
     public App(List<String> input) {
         this.input = input;
-        this.pointsTable = new HashMap<String, Integer>();
-        this.opponentMove = new HashMap<String, Integer>();
-        this.pointsTable.put("X", 0);
-        this.pointsTable.put("Y", 1);
-        this.pointsTable.put("Z", 2);
-
-        this.opponentMove.put("A", 0);  // Rock
-        this.opponentMove.put("B", 1);  // Paper
-        this.opponentMove.put("C", 2);  // Scissors
 
     }
 
@@ -37,7 +37,7 @@ public class App {
             int p = 0;
             String[] moves = move.split(" ");
             p = p + pointsTable.get(moves[1]) + 1;
-            int winner = (3 + pointsTable.get(moves[1]) - opponentMove.get(moves[0])) % 3;
+            int winner = (3 + pointsTable.get(moves[1]) - pointsTable.get(moves[0])) % 3;
             if(winner == 1) {
                 p = p + 6;
             } else if (winner == 0) {
@@ -54,26 +54,25 @@ public class App {
             int p = 0;
             String[] moves = move.split(" ");
 
-
-            if(Objects.equals(moves[1], "X")) {
+            if(moves[1].equals("X")) {
                 // I need to lose
-                if(Objects.equals(moves[0], "A")) {
+                if(moves[0].equals("A")) {
                     p=p+3;
-                } else if (Objects.equals(moves[0], "B")) {
-                    p = p+1;
+                } else if (moves[0].equals("B")) {
+                    p=p+1;
                 } else {
                     p=p+2;
                 }
-            } else if (Objects.equals(moves[1], "Y")) {
+            } else if (moves[1].equals("Y")) {
                 // this needs a draw
                 p = p + 3;
-                p = p + opponentMove.get(moves[0]) + 1;
+                p = p + pointsTable.get(moves[0]) + 1;
             } else {
                 // I need to win
-                if(Objects.equals(moves[0], "A")) {
+                if(moves[0].equals("A")) {
                     p=p+2;
-                } else if (Objects.equals(moves[0], "B")) {
-                    p = p+3;
+                } else if (moves[0].equals("B")) {
+                    p=p+3;
                 } else {
                     p=p+1;
                 }
