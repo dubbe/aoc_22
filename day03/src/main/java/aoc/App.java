@@ -26,6 +26,9 @@ public class App {
             char[] first = parts[0].toCharArray();
             char[] second = parts[1].toCharArray();
 
+            Arrays.sort(first);
+            Arrays.sort(second);
+
             ArrayList<Character> found = new ArrayList<Character>();
             for (char c : first) {
                 if (Arrays.binarySearch(second, c) >= 0) {
@@ -33,16 +36,10 @@ public class App {
                     if (Character.isUpperCase(c)) {
                         index += 26;
                     }
+                    sum = index + sum;
                     break;
                 }
             }
-
-            int index = (int) found.get(0) % 32;
-            if (Character.isUpperCase(found.get(0))) {
-                index += 26;
-            }
-
-            sum = sum + index;
         }
         return sum;
     }
@@ -66,7 +63,6 @@ public class App {
                 for (char c : first) {
                     if (Arrays.binarySearch(second, c) >= 0) {
                         if (Arrays.binarySearch(third, c) >= 0) {
-                            System.out.println(c);
                             int index = (int) c % 32;
                             if (Character.isUpperCase(c)) {
                                 index += 26;

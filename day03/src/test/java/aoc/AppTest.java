@@ -36,19 +36,6 @@ public class AppTest {
         assertEquals(70, classUnderTest.getSolutionPart2());
     }
 
-    /*
-    @Test
-
-    void part1() {
-        assertEquals(0, app.getSolutionPart1());
-    }
-
-    @Test
-    void part2() {
-        assertEquals(0, app.getSolutionPart2());
-    }
-    */
-
     private static List<String> parseInput(String filename) throws IOException {
         return Files.lines(Path.of(filename))
                 .collect(Collectors.toList());
