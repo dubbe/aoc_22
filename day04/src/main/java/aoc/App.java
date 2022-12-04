@@ -32,10 +32,8 @@ public class App {
                     .toList();
 
             if(pair1.get(0) <= pair2.get(0) && pair1.get(1) >= pair2.get(1)) {
-                System.out.println(line);
                 sum += 1;
             } else if(pair2.get(0) <= pair1.get(0) && pair2.get(1) >= pair1.get(1)) {
-                System.out.println(line);
                 sum+=1;
             }
         }
@@ -57,12 +55,10 @@ public class App {
             List<Integer> pair1range = getNumbersInRange(pair1.get(0), pair1.get(1)+1);
             List<Integer> pair2range = getNumbersInRange(pair2.get(0), pair2.get(1)+1);
 
-
             Set<Integer> result = pair1range.stream()
                     .distinct()
                     .filter(pair2range::contains)
                     .collect(Collectors.toSet());
-
 
             if(result.size() > 0) {
                 sum +=1;
