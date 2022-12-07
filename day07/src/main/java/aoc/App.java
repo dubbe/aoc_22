@@ -52,9 +52,7 @@ public class App {
         }
     }
     public Integer getSolutionPart1(List<String> input) {
-        Integer sum = 0;
-        Directory dir = getDirectory(input);
-        return calculateSize(dir, 100000);
+        return calculateSize(getDirectory(input), 100000);
     }
 
     private static Directory getDirectory(List<String> input) {
@@ -62,7 +60,7 @@ public class App {
         dir.name = "/";
         dir.size = 0;
         Directory currDir = dir;
-        Integer currSize = 0;
+        int currSize = 0;
         for(String line: input) {
 
             String[] params = line.split(" ");
@@ -118,8 +116,7 @@ public class App {
 
     public Integer getSolutionPart2(List<String> input) {
         Directory dir = getDirectory(input);
-        Integer unused = 70000000 - dir.size;
-        Integer needed = 30000000 - unused;
+        int needed = 30000000 - (70000000 - dir.size);
         List<Integer> found = new ArrayList<>();
         findSmallestUnder(dir, needed, found);
         Collections.sort(found);
