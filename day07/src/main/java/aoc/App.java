@@ -42,7 +42,6 @@ public class App {
     }
 
     public void findSmallestUnder (Directory dir, Integer under, List<Integer> found)  {
-        Integer size = 0;
         if(dir.directories != null) {
             for (Directory d : dir.directories) {
                 findSmallestUnder(d, under, found);
