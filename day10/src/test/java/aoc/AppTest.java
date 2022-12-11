@@ -26,25 +26,17 @@ public class AppTest {
         app = new App();
     }
 
-//    @Test
-//    void part1Mini() throws IOException {
-//        List<String> input = List.of(new String[]{
-//                "noop",
-//                "addx 3",
-//                "addx -5"
-//        });
-//        assertEquals(1, app.getSolutionPart1(input));
-//    }
     @Test
     void part1Solution() throws IOException {
         List<String> input = parseInput("input_test.txt");
-        assertEquals(13140, classUnderTest.getSolutionPart1(input));
+        assertEquals(10605, classUnderTest.getSolutionPart1(input));
     }
 
     @Test
     void part2Solution() throws IOException {
         List<String> input = parseInput("input_test.txt");
-        assertEquals(0, classUnderTest.getSolutionPart2(input));
+        long expected = 2713310158L;
+        assertEquals(expected, classUnderTest.getSolutionPart2(input));
     }
 
 

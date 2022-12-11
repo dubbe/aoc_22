@@ -49,69 +49,6 @@ public class App {
         }
     }
 
-    public void print(Point head, Point tail) {
-        for(int y=6; y>=0;y--) {
-            for (int x=0; x<6;x++) {
-                if(head.x == x && head.y==y) {
-                    System.out.print("H");
-                } else if(tail.x == x && tail.y==y) {
-                    System.out.print("T");
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.print("\n");
-        }
-    }
-
-    public String contains(Point p, Map<Integer, Point> tails) {
-        for(int i=0; i<tails.size(); i++) {
-
-            if(p.x == tails.get(i).x && p.y == tails.get(i).y) {
-                return (i+1) + "";
-            } else if (p.x == 0 && p.y == 0) {
-                return "s";
-            }
-        }
-        return ".";
-    }
-
-    public String cont(Point p, Set<Point> tails) {
-
-        if(tails.contains(p)) {
-            return "#";
-        } else {
-            return ".";
-        }
-
-    }
-
-    public void print(Point head, Map<Integer, Point> tails) {
-        for(int y=15; y>=-6;y--) {
-            for (int x=-11; x<15;x++) {
-                if(head.x == x && head.y==y) {
-                    System.out.print("H");
-                } else {
-                    System.out.print(contains(new Point(x,y), tails));
-                }
-            }
-            System.out.print("\n");
-        }
-    }
-
-    public void print(Set<Point> tails) {
-        for(int y=15; y>=-6;y--) {
-            for (int x=-11; x<15;x++) {
-                System.out.print(cont(new Point(x,y), tails));
-
-            }
-            System.out.print("\n");
-        }
-    }
-
-
-
-
     public Integer getSolutionPart1(List<String> input) {
         Map<Point, Integer> grid = new HashMap<>();
         Point head = new Point(0,0);
@@ -131,14 +68,12 @@ public class App {
                         tail.x = head.x;
                     }
                 }
-
                 grid.put(tail, 1);
             }
         }
 
         return grid.size();
     }
-
 
     public Integer getSolutionPart2(List<String> input) {
         Set<Point> grid = new HashSet<>();
@@ -208,8 +143,6 @@ public class App {
                 tails = newTails;
 
                 grid.add(lastPart);
-
-
             }
         }
 

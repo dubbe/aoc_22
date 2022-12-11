@@ -4,111 +4,229 @@
 package aoc;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class App {
+
+    private static class Monkey {
+        public Integer id;
+        public Queue<Long> items;
+        public String operation;
+        public Integer divisible;
+        public Integer ifTrue;
+        public Integer ifFalse;
+        public Integer inspected;
+    }
 
     public App() {
     }
 
 
     public Integer getSolutionPart1(List<String> input) {
-        int x = 1;
-        int cycle = 1;
-        List<Integer> cycles = new ArrayList<>();
-        cycles.add(20);
-        cycles.add(60);
-        cycles.add(100);
-        cycles.add(140);
-        cycles.add(180);
-        cycles.add(220);
-
-        int sum = 0;
-
+        Map<Integer, Monkey> monkeys = new HashMap<>();
+        Monkey monkey = new Monkey();
         for(String line : input) {
-            if(line.equals("noop")) {
-                cycle +=1;
-                if(cycles.contains(cycle)) {
-                    sum += (x*cycle);
-                }
-            } else {
-                String[] instr = line.split(" ");
-                for(int i = 0; i < 2; i++) {
-                    cycle +=1;
-                    if(i==1) {
-                        x += Integer.parseInt(instr[1]);
-                    }
-                    if(cycles.contains(cycle)) {
-                        sum += (x*cycle);
-                    }
-                }
 
+            if(line.equals("")) {
+                monkeys.put(monkey.id, monkey);
+                monkey = new Monkey();
+                continue;
+            }
+            String[] test = line.trim().split(" ");
 
+            switch(test[0]) {
+                case "Monkey": {
+                    String id = test[1].replace(":", "");
+                    monkey.id = Integer.parseInt(id);
+                    monkey.items = new LinkedList<>();
+                    monkey.inspected = 0;
+                    break;
+                }
+                case "Starting": {
+                    for(String item: test) {
+                        item = item.replace(",", "");
+                        if(item.matches("[0-9]+")) {
+                            monkey.items.add((long) Integer.parseInt(item));
+                        }
+                    }
+                    break;
+                }
+                case "Operation:": {
+                    String[] t = line.split("=");
+                    monkey.operation = t[1].trim();
+                    break;
+                }
+                case "Test:": {
+                    String[] t = line.split("by");
+                    monkey.divisible = Integer.parseInt(t[1].trim());
+                    break;
+                }
+                case "If": {
+                    String[] t = line.split("monkey");
+                    if(test[1].equals("true:")) {
+                        monkey.ifTrue = Integer.parseInt(t[1].trim());
+                    } else {
+                        monkey.ifFalse = Integer.parseInt(t[1].trim());
+                    }
+                    break;
+                }
+                default: {
+                    System.out.println("### " + line);
+                }
             }
 
         }
+        monkeys.put(monkey.id, monkey);
 
-        return sum;
+        for(int i = 0; i<20; i++) {
+            for(Monkey m: monkeys.values()) {
+                while(m.items.size() > 0) {
+                    m.inspected++;
+                    Long item = m.items.poll();
+                    Long newWorry = calculateWorry(item, m.operation);
+                    newWorry = newWorry / 3;
+                    if (newWorry % m.divisible == 0) {
+                        monkeys.get(m.ifTrue).items.add(newWorry);
+                    } else {
+                        monkeys.get(m.ifFalse).items.add(newWorry);
+                    }
+                }
+            }
+
+
+        }
+        List<Integer> sums = new ArrayList<>();
+        for(Monkey m: monkeys.values()) {
+            sums.add(m.inspected);
+        }
+        Collections.sort(sums,  Collections.reverseOrder());
+        return sums.get(0) * sums.get(1);
     }
 
-    public Integer getSolutionPart2(List<String> input) {
-        int x = 1;
-        int cycle = 1;
+    public Long calculateWorry(Long old, String operation)  {
+        String[] op = operation.split(" ");
+        String operand = op[1];
+        Long value1 = 0L;
+        Long value2 = 0L;
+        if(op[0].equals("old")) {
+            value1 = old;
+        } else {
+            value1 = (long) Integer.parseInt(op[0]);
+        }
+        if(op[2].equals("old")) {
+            value2 = old;
+        } else {
+            value2 = (long) Integer.parseInt(op[2]);
+        }
+        switch(operand){
+            case "+": {
+                return value1 + value2;
+            }
+            case "-": {
+                return value1 - value2;
+            }
+            case "*": {
+                return value1 * value2;
+            }
+            case "/": {
+                return value1 / value2;
+            }
+            default : {
+                System.out.println("### " + operation);
+                return 0L;
+            }
+        }
+    }
 
-        int sum = 0;
-
-        String answer = "";
-
+    public long getSolutionPart2(List<String> input) {
+        Map<Integer, Monkey> monkeys = new HashMap<>();
+        Monkey monkey = new Monkey();
         for(String line : input) {
-            if(line.equals("noop")) {
 
-                if (cycle >= x && cycle <= x + 2) {
-                    answer += "#";
-                } else {
-                    answer += ".";
+            if(line.equals("")) {
+                monkeys.put(monkey.id, monkey);
+                monkey = new Monkey();
+                continue;
+            }
+            String[] test = line.trim().split(" ");
+
+            switch(test[0]) {
+                case "Monkey": {
+                    String id = test[1].replace(":", "");
+                    monkey.id = Integer.parseInt(id);
+                    monkey.items = new LinkedList<>();
+                    monkey.inspected = 0;
+                    break;
                 }
-
-                if(cycle == 40) {
-                    answer +="\n";
-                    cycle=1;
-                } else {
-                    cycle += 1;
+                case "Starting": {
+                    for(String item: test) {
+                        item = item.replace(",", "");
+                        if(item.matches("[0-9]+")) {
+                            monkey.items.add(Long.valueOf(item));
+                        }
+                    }
+                    break;
                 }
-            } else {
-                String[] instr = line.split(" ");
-                for(int i = 0; i < 2; i++) {
-
-                    if (cycle >= x && cycle <= x + 2) {
-                        answer += "#";
+                case "Operation:": {
+                    String[] t = line.split("=");
+                    monkey.operation = t[1].trim();
+                    break;
+                }
+                case "Test:": {
+                    String[] t = line.split("by");
+                    monkey.divisible = Integer.parseInt(t[1].trim());
+                    break;
+                }
+                case "If": {
+                    String[] t = line.split("monkey");
+                    if(test[1].equals("true:")) {
+                        monkey.ifTrue = Integer.parseInt(t[1].trim());
                     } else {
-                        answer += ".";
+                        monkey.ifFalse = Integer.parseInt(t[1].trim());
                     }
-
-
-                    if(i==1) {
-                        x += Integer.parseInt(instr[1]);
-                    }
-
-                    if(cycle == 40) {
-                        answer +="\n";
-                        cycle=1;
-                    } else {
-                        cycle += 1;
-                    }
+                    break;
                 }
-
-
+                default: {
+                   System.out.println("### " + line);
+                }
             }
 
         }
-        
-        System.out.println(answer);
-        return sum;
+        monkeys.put(monkey.id, monkey);
+
+        int superModulo = 1;
+        for(Monkey m: monkeys.values()) {
+            superModulo *= m.divisible;
+        }
+
+        for(int i = 0; i<10000; i++) {
+            for(Monkey m: monkeys.values()) {
+
+                while(m.items.size() > 0) {
+                    m.inspected++;
+                    Long item = m.items.poll();
+                    Long newWorry = calculateWorry(item, m.operation);
+                    newWorry = newWorry % superModulo;
+                    if (newWorry % m.divisible == 0) {
+                        monkeys.get(m.ifTrue).items.add(newWorry);
+                    } else {
+                        monkeys.get(m.ifFalse).items.add(newWorry);
+                    }
+                }
+            }
+
+        }
+        List<Integer> sums = new ArrayList<>();
+        for(Monkey m: monkeys.values()) {
+            sums.add(m.inspected);
+        }
+        Collections.sort(sums,  Collections.reverseOrder());
+        return (long) sums.get(0) * sums.get(1);
     }
 
     public static void main(String[] args) throws IOException {
