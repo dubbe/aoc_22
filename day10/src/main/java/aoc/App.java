@@ -3,24 +3,76 @@
  */
 package aoc;
 
+import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class App {
 
-    private static class Monkey {
-        public Integer id;
-        public Queue<Long> items;
-        public String operation;
-        public Integer divisible;
-        public Integer ifTrue;
-        public Integer ifFalse;
-        public Integer inspected;
+    public class Coord implements Comparable<Coord> {
+        public int x = 0;
+        public int y = 0;
+
+        public Coord(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public String toString() {
+            return "(" + x + "," + y + ")";
+        }
+
+        public ArrayList<Coord> directNeighbors() {
+            ArrayList<Coord> list = new ArrayList<Coord>();
+            for (int yOff = -1; yOff < 2; yOff++) {
+                for (int xOff = -1; xOff < 2; xOff++) {
+                    //if not diagonal or self
+                    if (xOff == 0 ^ yOff == 0) {
+                        list.add(new Coord(x + xOff, y + yOff));
+                    }
+                }
+            }
+            return list;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(y, x);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Coord other = (Coord) obj;
+            if (x != other.x)
+                return false;
+            if (y != other.y)
+                return false;
+            return true;
+        }
+
+        @Override
+        public int compareTo(Coord o) {
+            if (this.equals(o))
+                return 0;
+            else if (o.y > this.y)
+                return -1;
+            else if (o.y < this.y)
+                return 1;
+            else
+                return (o.x > this.x ? -1 : 1);
+        }
     }
 
     public App() {
@@ -28,205 +80,99 @@ public class App {
 
 
     public Integer getSolutionPart1(List<String> input) {
-        Map<Integer, Monkey> monkeys = new HashMap<>();
-        Monkey monkey = new Monkey();
-        for(String line : input) {
-
-            if(line.equals("")) {
-                monkeys.put(monkey.id, monkey);
-                monkey = new Monkey();
-                continue;
+        int sum = 0;
+        Map<Coord, Integer> map = new HashMap<>();
+        Coord start = null;
+        Coord end = null;
+        int x = 0;
+        int y = 0;
+        for (String line : input) {
+            for (Character c : line.toCharArray()) {
+                Coord p = new Coord(x, y);
+                if (c == 'S') {
+                    map.put(p, 1);
+                    start = p;
+                } else if (c == 'E') {
+                    map.put(p, (int) 'z' - 96);
+                    end = p;
+                } else {
+                    map.put(p, (int) c - 96);
+                }
+                x++;
             }
-            String[] test = line.trim().split(" ");
-
-            switch(test[0]) {
-                case "Monkey": {
-                    String id = test[1].replace(":", "");
-                    monkey.id = Integer.parseInt(id);
-                    monkey.items = new LinkedList<>();
-                    monkey.inspected = 0;
-                    break;
-                }
-                case "Starting": {
-                    for(String item: test) {
-                        item = item.replace(",", "");
-                        if(item.matches("[0-9]+")) {
-                            monkey.items.add((long) Integer.parseInt(item));
-                        }
-                    }
-                    break;
-                }
-                case "Operation:": {
-                    String[] t = line.split("=");
-                    monkey.operation = t[1].trim();
-                    break;
-                }
-                case "Test:": {
-                    String[] t = line.split("by");
-                    monkey.divisible = Integer.parseInt(t[1].trim());
-                    break;
-                }
-                case "If": {
-                    String[] t = line.split("monkey");
-                    if(test[1].equals("true:")) {
-                        monkey.ifTrue = Integer.parseInt(t[1].trim());
-                    } else {
-                        monkey.ifFalse = Integer.parseInt(t[1].trim());
-                    }
-                    break;
-                }
-                default: {
-                    System.out.println("### " + line);
-                }
-            }
-
+            y++;
+            x = 0;
         }
-        monkeys.put(monkey.id, monkey);
 
-        for(int i = 0; i<20; i++) {
-            for(Monkey m: monkeys.values()) {
-                while(m.items.size() > 0) {
-                    m.inspected++;
-                    Long item = m.items.poll();
-                    Long newWorry = calculateWorry(item, m.operation);
-                    newWorry = newWorry / 3;
-                    if (newWorry % m.divisible == 0) {
-                        monkeys.get(m.ifTrue).items.add(newWorry);
-                    } else {
-                        monkeys.get(m.ifFalse).items.add(newWorry);
-                    }
-                }
-            }
-
-
-        }
-        List<Integer> sums = new ArrayList<>();
-        for(Monkey m: monkeys.values()) {
-            sums.add(m.inspected);
-        }
-        Collections.sort(sums,  Collections.reverseOrder());
-        return sums.get(0) * sums.get(1);
+        System.out.println(map);
+        sum = BFSPathFind(map, start, end);
+        return sum;
     }
 
-    public Long calculateWorry(Long old, String operation)  {
-        String[] op = operation.split(" ");
-        String operand = op[1];
-        Long value1 = 0L;
-        Long value2 = 0L;
-        if(op[0].equals("old")) {
-            value1 = old;
-        } else {
-            value1 = (long) Integer.parseInt(op[0]);
-        }
-        if(op[2].equals("old")) {
-            value2 = old;
-        } else {
-            value2 = (long) Integer.parseInt(op[2]);
-        }
-        switch(operand){
-            case "+": {
-                return value1 + value2;
+    public Integer BFSPathFind(Map<Coord, Integer> map, Coord start, Coord end) {
+        int sum = 0;
+        HashMap<Coord, Integer> cost = new HashMap<Coord, Integer>();
+        HashMap<Coord, Coord> parent = new HashMap<Coord, Coord>();
+        Queue<Coord> queue = new LinkedList<>();
+        queue.add(start);
+        cost.put(start, 0);
+        while (!queue.isEmpty()) {
+            Coord curr = queue.poll();
+            if (curr.equals(end)) {
+                while (parent.containsKey(curr)) {
+                    curr = parent.get(curr);
+                    sum++;
+                }
             }
-            case "-": {
-                return value1 - value2;
-            }
-            case "*": {
-                return value1 * value2;
-            }
-            case "/": {
-                return value1 / value2;
-            }
-            default : {
-                System.out.println("### " + operation);
-                return 0L;
+            for (Coord p : curr.directNeighbors()) {
+                if (!map.containsKey(p) || map.get(p) > map.get(curr) + 1) {
+                    continue;
+                }
+                int possible = cost.get(curr) + 1;
+                if (possible < cost.get(curr) || !cost.containsKey(p)) {
+                    cost.put(p, possible);
+                    parent.put(p, curr);
+                    queue.add(p);
+                }
             }
         }
+        return sum;
     }
 
-    public long getSolutionPart2(List<String> input) {
-        Map<Integer, Monkey> monkeys = new HashMap<>();
-        Monkey monkey = new Monkey();
-        for(String line : input) {
+    public Integer getSolutionPart2(List<String> input) {
 
-            if(line.equals("")) {
-                monkeys.put(monkey.id, monkey);
-                monkey = new Monkey();
-                continue;
+        Map<Coord, Integer> map = new HashMap<>();
+        Coord end = null;
+        int x = 0;
+        int y = 0;
+        for (String line : input) {
+            for (Character c : line.toCharArray()) {
+                Coord p = new Coord(x, y);
+                if (c == 'S') {
+                    map.put(p, 1);
+                } else if (c == 'E') {
+                    map.put(p, (int) 'z' - 96);
+                    end = p;
+                } else {
+                    map.put(p, (int) c - 96);
+                }
+                x++;
             }
-            String[] test = line.trim().split(" ");
+            y++;
+            x = 0;
+        }
 
-            switch(test[0]) {
-                case "Monkey": {
-                    String id = test[1].replace(":", "");
-                    monkey.id = Integer.parseInt(id);
-                    monkey.items = new LinkedList<>();
-                    monkey.inspected = 0;
-                    break;
-                }
-                case "Starting": {
-                    for(String item: test) {
-                        item = item.replace(",", "");
-                        if(item.matches("[0-9]+")) {
-                            monkey.items.add(Long.valueOf(item));
-                        }
-                    }
-                    break;
-                }
-                case "Operation:": {
-                    String[] t = line.split("=");
-                    monkey.operation = t[1].trim();
-                    break;
-                }
-                case "Test:": {
-                    String[] t = line.split("by");
-                    monkey.divisible = Integer.parseInt(t[1].trim());
-                    break;
-                }
-                case "If": {
-                    String[] t = line.split("monkey");
-                    if(test[1].equals("true:")) {
-                        monkey.ifTrue = Integer.parseInt(t[1].trim());
-                    } else {
-                        monkey.ifFalse = Integer.parseInt(t[1].trim());
-                    }
-                    break;
-                }
-                default: {
-                   System.out.println("### " + line);
+        int minSteps = Integer.MAX_VALUE;
+        for (Coord c : map.keySet()) {
+            if (map.get(c) == 1) {
+                int path = BFSPathFind(map, c, end);
+                if (path < minSteps && path != 0) {
+                    minSteps = path;
                 }
             }
-
-        }
-        monkeys.put(monkey.id, monkey);
-
-        int superModulo = 1;
-        for(Monkey m: monkeys.values()) {
-            superModulo *= m.divisible;
         }
 
-        for(int i = 0; i<10000; i++) {
-            for(Monkey m: monkeys.values()) {
-
-                while(m.items.size() > 0) {
-                    m.inspected++;
-                    Long item = m.items.poll();
-                    Long newWorry = calculateWorry(item, m.operation);
-                    newWorry = newWorry % superModulo;
-                    if (newWorry % m.divisible == 0) {
-                        monkeys.get(m.ifTrue).items.add(newWorry);
-                    } else {
-                        monkeys.get(m.ifFalse).items.add(newWorry);
-                    }
-                }
-            }
-
-        }
-        List<Integer> sums = new ArrayList<>();
-        for(Monkey m: monkeys.values()) {
-            sums.add(m.inspected);
-        }
-        Collections.sort(sums,  Collections.reverseOrder());
-        return (long) sums.get(0) * sums.get(1);
+        return minSteps;
     }
 
     public static void main(String[] args) throws IOException {
