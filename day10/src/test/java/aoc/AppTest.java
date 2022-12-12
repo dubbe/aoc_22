@@ -31,13 +31,13 @@ public class AppTest {
 
     @Test
     void part1Solution() throws IOException {
-        List<String> input = parseInput("input.txt");
+        List<String> input = parseInput("input_test.txt");
         assertEquals(31, classUnderTest.getSolutionPart1(input));
     }
 
     @Test
     void part2Solution() throws IOException {
-        List<String> input = parseInput("input.txt");
+        List<String> input = parseInput("input_test.txt");
         assertEquals(29, classUnderTest.getSolutionPart2(input));
     }
 
