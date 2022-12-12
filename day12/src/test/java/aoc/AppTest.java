@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,7 @@ public class AppTest {
     App classUnderTest;
     App app;
 
+
     @BeforeEach
     void createSubject() throws IOException {
 
@@ -26,25 +29,16 @@ public class AppTest {
         app = new App();
     }
 
-//    @Test
-//    void part1Mini() throws IOException {
-//        List<String> input = List.of(new String[]{
-//                "noop",
-//                "addx 3",
-//                "addx -5"
-//        });
-//        assertEquals(1, app.getSolutionPart1(input));
-//    }
     @Test
     void part1Solution() throws IOException {
         List<String> input = parseInput("input_test.txt");
-        assertEquals(13140, classUnderTest.getSolutionPart1(input));
+        assertEquals(31, classUnderTest.getSolutionPart1(input));
     }
 
     @Test
     void part2Solution() throws IOException {
         List<String> input = parseInput("input_test.txt");
-        assertEquals(0, classUnderTest.getSolutionPart2(input));
+        assertEquals(29, classUnderTest.getSolutionPart2(input));
     }
 
 
