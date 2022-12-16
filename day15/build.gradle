@@ -9,7 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
-    id 'java' // for test task}
+    id 'java' // for test task
 }
 
 repositories {
