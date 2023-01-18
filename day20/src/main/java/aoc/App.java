@@ -36,11 +36,6 @@ public class App {
             previousNode.nextNode = nextNode;
             nextNode.previousNode = previousNode;
 
-            Node current = nextNode;
-            do {
-                current = current.nextNode;
-            } while (current != nextNode);
-
             Node curr = this.nextNode;
             if(steps > 0) {
                 for (long i = 0; i < steps - 1; i++) {
