@@ -3,14 +3,11 @@
  */
 package aoc;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -20,6 +17,10 @@ public class App {
 
         int index;
         long value;
+
+        Node origNextNode;
+        Node origPreviousNode;
+
         Node nextNode;
         Node previousNode;
 
@@ -27,12 +28,44 @@ public class App {
             this.index = index;
             this.value = value;
         }
+        public void move(long steps) {
 
+            if(steps == 0) {
+                return;
+            }
+
+            previousNode.nextNode = nextNode;
+            nextNode.previousNode = previousNode;
+
+            Node current = nextNode;
+            do {
+                current = current.nextNode;
+            } while (current != nextNode);
+
+            Node curr = this.nextNode;
+            if(steps > 0) {
+                for (long i = 0; i < steps - 1; i++) {
+                    curr = curr.nextNode;
+                }
+            } else {
+                for (long i = 0; i < Math.abs(steps) + 1; i++) {
+                    curr = curr.previousNode;
+                }
+            }
+
+            Node nextNode = curr.nextNode;
+            curr.nextNode = this;
+            this.previousNode = curr;
+            this.nextNode = nextNode;
+            nextNode.previousNode = this;
+
+        }
     }
 
     public class CircularLinkedList {
         private Node head = null;
         private Node tail = null;
+
         private int size = 0;
 
         public void add(long value) {
@@ -45,126 +78,20 @@ public class App {
                 newNode.previousNode = tail;
                 newNode.nextNode = head;
 
+                newNode.origPreviousNode = tail;
+                newNode.origNextNode = head;
+
                 tail.nextNode = newNode;
-                head.previousNode = tail;
+                tail.origNextNode = newNode;
+
                 tail = newNode;
+
+                head.previousNode = tail;
+                head.origPreviousNode = tail;
+
             }
 
             size++;
-        }
-
-        public void addAfterSteps(int index, long value) {
-            Node newNode = new Node(index, value);
-            Node currentNode = head;
-            long steps = value;
-
-            if(value < 0) {
-                steps = (steps * -1);
-            }
-
-            if(steps > (size)) {
-                steps = steps%(size);
-
-            }
-
-            if(value < 0) {
-                steps = steps + 2;
-            }
-
-
-            for(long i = 0; i < steps-1; i++) {
-                if(value < 0) {
-                    currentNode = currentNode.previousNode;
-                } else {
-                    currentNode = currentNode.nextNode;
-                }
-            }
-
-            Node nextNode = currentNode.nextNode;
-            currentNode.nextNode = newNode;
-            newNode.previousNode = currentNode;
-            newNode.nextNode = nextNode;
-            nextNode.previousNode = newNode;
-            size++;
-        }
-
-        public void print() {
-            Node current = head;
-            if (head != null) {
-                do {
-                    System.out.print(current.value + ", ");
-                    current = current.nextNode;
-                } while (current != head);
-            }
-            System.out.println();
-        }
-
-        public long get(int index) {
-
-            Node current = head;
-            if (head != null) {
-                do {
-                    if (current.index == index) {
-                        return current.value;
-                    }
-                    current = current.nextNode;
-                } while (current != head);
-            }
-            return 0;
-        }
-
-        public long getLarge(int index) {
-            if(index > size) {
-                int test= index % size;
-                index = test;
-            }
-            Node current = head;
-            //System.out.println(head.value);
-            for(int i = 0; i < index; i++) {
-                current = current.nextNode;
-            }
-
-            return current.value;
-        }
-
-        public void setHead(long value) {
-            Node current = head;
-            if (head != null) {
-                do {
-                    if (current.value == value) {
-                        head = current;
-                        tail = current.previousNode;
-                        break;
-                    }
-                    current = current.nextNode;
-                } while (current != head);
-            }
-        }
-
-        public void delete(long value) {
-            Node current = head;
-            if (head != null) {
-                do {
-                    if (current.value == value) {
-                        if (current == head) {
-                            head = current.nextNode;
-                            head.previousNode = tail;
-                            tail.nextNode = head;
-                        } else if (current == tail) {
-                            tail = current.previousNode;
-                            tail.nextNode = head;
-                            head.previousNode = tail;
-                        } else {
-                            current.previousNode.nextNode = current.nextNode;
-                            current.nextNode.previousNode = current.previousNode;
-                            head = current.nextNode;
-                            tail = current.previousNode;
-                        }
-                        size--;
-                    }
-                    current = current.nextNode;
-                } while (current != head);
-            }
         }
 
         public int size() {
@@ -180,65 +107,105 @@ public class App {
         for(String line : input) {
             cll.add(Integer.parseInt(line));
         }
-        for(int i = 0; i<cll.size(); i++) {
-            long value = cll.get(i);
-            if(value == 0) {
-                continue;
+
+        Node current = cll.head;
+        do {
+            current.move(current.value);
+            current = current.origNextNode;
+        } while (current != cll.head);
+
+        do {
+            if(current.value == 0) {
+                break;
             }
-            cll.delete(value);
-            cll.addAfterSteps(i, value);
+            current = current.nextNode;
+        } while (current != cll.head);
+
+
+
+        int value1 = 1000 % cll.size();
+
+        Node start = current;
+        for(int i = 0; i < value1; i++) {
+            start = start.nextNode;
         }
+        long v1 = start.value;
 
-        cll.setHead(0);
-        System.out.println("After 1 rounds (size: " + cll.size() + ")");
-        cll.print();
+        long value2 = 2000 % cll.size();
 
-        long value1 = cll.getLarge(1000);
-        long value2 = cll.getLarge(2000);
-        long value3 = cll.getLarge(3000);
+        start = current;
+        for(int i = 0; i < value2; i++) {
+            start = start.nextNode;
+        }
+        long v2 =  start.value;
 
-        long sum = value1 + value2 + value3;
-        System.out.println(value1 + " " + value2 + " " + value3 + " = " + sum);
+        long value3 = 3000 % cll.size();
+
+        start = current;
+        for(int i = 0; i < value3; i++) {
+            start = start.nextNode;
+        }
+        long v3 =  start.value;
+
+
+        long sum = v1 + v2 + v3;
+
         return Long.toString(sum);
     }
     public String getSolutionPart2(List<String> input) {
         CircularLinkedList cll = new CircularLinkedList();
-        System.out.println(Long.MAX_VALUE);
-        System.out.println(Long.MIN_VALUE);
-
-//        input.sort(new Comparator<String>() {
-//            public int compare(String s1, String s2) {
-//                int i1 = Integer.parseInt(s1);
-//                int i2 = Integer.parseInt(s2);
-//                return Integer.compare(i1, i2);
-//            }
-//        });
-
         for(String line : input) {
-            System.out.println(Long.parseLong(line) + " * 811589153 = " + Long.parseLong(line) * 811589153L);
             cll.add(Long.parseLong(line) * 811589153L);
         }
 
+        Node current = cll.head;
         for(int x = 0; x < 10; x++) {
-            for (int i = 0; i < cll.size(); i++) {
-                long value = cll.get(i);
-                if (value == 0) {
-                    continue;
-                }
-                cll.delete(value);
-                cll.addAfterSteps(i, value);
-            }
-            System.out.println("After " + (x+1) + " rounds (size: " + cll.size() + ")");
-            cll.setHead(0);
-            cll.print();
-        }
-        long value1 = cll.getLarge(1000);
-        long value2 = cll.getLarge(2000);
-        long value3 = cll.getLarge(3000);
 
-        long sum = value1 + value2 + value3;
-        System.out.println(value1 + " + " + value2 + " + " + value3 + " = " + sum);
+            do {
+                long steps = current.value % (cll.size()-1);
+                current.move(steps);
+
+                current = current.origNextNode;
+            } while (current != cll.head);
+        }
+
+        do {
+            if (current.value == 0) {
+                break;
+            }
+            current = current.nextNode;
+        } while (current != cll.head);
+
+
+        int value1 = 1000 % cll.size();
+
+        Node start = current;
+        for(int i = 0; i < value1; i++) {
+            start = start.nextNode;
+        }
+        long v1 = start.value;
+
+        long value2 = 2000 % cll.size();
+
+        start = current;
+        for(int i = 0; i < value2; i++) {
+            start = start.nextNode;
+        }
+        long v2 =  start.value;
+
+
+        long value3 = 3000 % cll.size();
+
+        start = current;
+        for(int i = 0; i < value3; i++) {
+            start = start.nextNode;
+        }
+        long v3 =  start.value;
+
+        long sum = v1 + v2 + v3;
+
         return Long.toString(sum);
+
     }
 
     public static void main(String[] args) throws IOException {

@@ -38,7 +38,7 @@ public class AppTest {
         List<String> input = parseInput("input.txt");
         assertEquals("8721", classUnderTest.getSolutionPart1(input));
     }
-
+//
     @Test
     void part2Solution() throws IOException {
         List<String> input = parseInput("input_test.txt");
