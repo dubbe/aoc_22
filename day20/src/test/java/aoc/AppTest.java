@@ -47,7 +47,7 @@ public class AppTest {
     @Test
     void part2SolutionReal() throws IOException {
         List<String> input = parseInput("input.txt");
-        assertEquals("1623178306", classUnderTest.getSolutionPart2(input));
+        assertEquals("831878881825", classUnderTest.getSolutionPart2(input));
     }
 
 

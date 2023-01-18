@@ -6,7 +6,6 @@ package aoc;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,9 +96,55 @@ public class App {
         public int size() {
             return size;
         }
+
+        public void moveToValue(int value) {
+            Node current = head;
+            do {
+                if(current.value == value) {
+                    head = current;
+                    tail = current.previousNode;
+                }
+                current = current.nextNode;
+            } while (current != head);
+        }
+
+        public Node move(int steps) {
+            if(steps > size) {
+                steps = steps % size;
+            }
+            Node current = head;
+            for (int i = 0; i < steps; i++) {
+                current = current.nextNode;
+            }
+            return current;
+        }
+
     }
 
     public App() {
+    }
+
+
+    public String solve(CircularLinkedList cll, int times) {
+        Node current = cll.head;
+
+        for(int i = 0; i < times; i++) {
+            do {
+                long steps = current.value % (cll.size() - 1);
+                current.move(steps);
+                current = current.origNextNode;
+            } while (current != cll.head);
+        }
+
+        cll.moveToValue(0);
+
+        Node v1 = cll.move(1000);
+        Node v2 = cll.move(2000);
+        Node v3 = cll.move(3000);
+
+        long sum = v1.value + v2.value + v3.value;
+
+        return Long.toString(sum);
     }
 
     public String getSolutionPart1(List<String> input) {
@@ -108,104 +153,15 @@ public class App {
             cll.add(Integer.parseInt(line));
         }
 
-        Node current = cll.head;
-        do {
-            current.move(current.value);
-            current = current.origNextNode;
-        } while (current != cll.head);
+        return solve(cll, 1);
 
-        do {
-            if(current.value == 0) {
-                break;
-            }
-            current = current.nextNode;
-        } while (current != cll.head);
-
-
-
-        int value1 = 1000 % cll.size();
-
-        Node start = current;
-        for(int i = 0; i < value1; i++) {
-            start = start.nextNode;
-        }
-        long v1 = start.value;
-
-        long value2 = 2000 % cll.size();
-
-        start = current;
-        for(int i = 0; i < value2; i++) {
-            start = start.nextNode;
-        }
-        long v2 =  start.value;
-
-        long value3 = 3000 % cll.size();
-
-        start = current;
-        for(int i = 0; i < value3; i++) {
-            start = start.nextNode;
-        }
-        long v3 =  start.value;
-
-
-        long sum = v1 + v2 + v3;
-
-        return Long.toString(sum);
     }
     public String getSolutionPart2(List<String> input) {
         CircularLinkedList cll = new CircularLinkedList();
         for(String line : input) {
             cll.add(Long.parseLong(line) * 811589153L);
         }
-
-        Node current = cll.head;
-        for(int x = 0; x < 10; x++) {
-
-            do {
-                long steps = current.value % (cll.size()-1);
-                current.move(steps);
-
-                current = current.origNextNode;
-            } while (current != cll.head);
-        }
-
-        do {
-            if (current.value == 0) {
-                break;
-            }
-            current = current.nextNode;
-        } while (current != cll.head);
-
-
-        int value1 = 1000 % cll.size();
-
-        Node start = current;
-        for(int i = 0; i < value1; i++) {
-            start = start.nextNode;
-        }
-        long v1 = start.value;
-
-        long value2 = 2000 % cll.size();
-
-        start = current;
-        for(int i = 0; i < value2; i++) {
-            start = start.nextNode;
-        }
-        long v2 =  start.value;
-
-
-        long value3 = 3000 % cll.size();
-
-        start = current;
-        for(int i = 0; i < value3; i++) {
-            start = start.nextNode;
-        }
-        long v3 =  start.value;
-
-        long sum = v1 + v2 + v3;
-
-        return Long.toString(sum);
-
+        return solve(cll, 10);
     }
 
     public static void main(String[] args) throws IOException {
