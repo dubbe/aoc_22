@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class App {
 
-    class Node {
+    static class Node {
 
         int index;
         long value;
@@ -47,12 +47,9 @@ public class App {
                 }
             }
 
-            Node nextNode = curr.nextNode;
-            curr.nextNode = this;
+            Node nextNode = this.nextNode = curr.nextNode;
+            curr.nextNode = nextNode.previousNode = this;
             this.previousNode = curr;
-            this.nextNode = nextNode;
-            nextNode.previousNode = this;
-
         }
     }
 
@@ -69,11 +66,8 @@ public class App {
                 head = newNode;
                 tail = head;
             } else {
-                newNode.previousNode = tail;
-                newNode.nextNode = head;
-
-                newNode.origPreviousNode = tail;
-                newNode.origNextNode = head;
+                newNode.previousNode = newNode.origPreviousNode = tail;
+                newNode.nextNode = newNode.origNextNode = head;
 
                 tail.nextNode = newNode;
                 tail.origNextNode = newNode;
@@ -104,9 +98,7 @@ public class App {
         }
 
         public Node move(int steps) {
-            if(steps > size) {
-                steps = steps % size;
-            }
+            steps = steps % size;
             Node current = head;
             for (int i = 0; i < steps; i++) {
                 current = current.nextNode;
